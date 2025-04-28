@@ -1,3 +1,4 @@
+
 run = "node index.js"
 entrypoint = "index.js"
 modules = ["nodejs-18:v3-20230608-f4cd419"]
@@ -12,9 +13,23 @@ run = "node index.js"
 deploymentTarget = "cloudrun"
 
 [languages]
-javascript = "nodejs-18"
+[languages.javascript]
+pattern = "**/*.js"
+syntax = "javascript"
 
 [env]
 XDG_CONFIG_HOME = "/home/runner/.config"
 PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin"
 npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 42058035
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node index.js"
