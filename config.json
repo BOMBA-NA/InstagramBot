@@ -1,0 +1,19 @@
+{
+  "bot": {
+    "prefix": "!",
+    "adminOnly": true,
+    "rateLimits": {
+      "likes": 200,
+      "follows": 50,
+      "comments": 30
+    }
+  },
+  "instagram": {
+    "username": "your_instagram_username",
+    "password": "your_instagram_password",
+    "apiTimeout": 30000
+  },
+  "adminUsers": ["admin123", "mod456"],
+  "autoReconnect": true,
+  "loggingLevel": "info"
+}
