@@ -1,0 +1,36 @@
+{
+  "instagram": {
+    "username": "your_bot_instagram_username",
+    "password": "your_bot_instagram_password"
+  },
+  "bot": {
+    "prefix": "*",
+    "owner": "your_instagram_username",
+    "admins": [],
+    "version": "1.0.0",
+    "cooldowns": {
+      "default": 3,
+      "commands": {
+        "work": 1800,
+        "daily": 86400,
+        "game": 30
+      }
+    },
+    "autoReconnect": true,
+    "dmPollingInterval": 30000,
+    "maxRetries": 3
+  },
+  "economy": {
+    "startingBalance": 1000,
+    "dailyReward": 500,
+    "interestRate": 0.05,
+    "maxLoanAmount": 5000
+  },
+  "features": {
+    "economy": true,
+    "games": true,
+    "adminCommands": true,
+    "eventLogging": true,
+    "autoResponder": false
+  }
+}
