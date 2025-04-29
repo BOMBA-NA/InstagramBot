@@ -1,19 +1,36 @@
 {
-  "bot": {
-    "prefix": "*",
-    "adminOnly": true,
-    "rateLimits": {
-      "likes": 0,
-      "follows": 10000,
-      "comments": 0
-    }
-  },
   "instagram": {
     "username": "kianoyamat",
-    "password": "0Astoasto",
-    "apiTimeout": 30000
+    "password": "0Astoasto"
   },
-  "adminUsers": ["oyamatmots"],
-  "autoReconnect": true,
-  "loggingLevel": "info"
+  "bot": {
+    "prefix": "*",
+    "owner": "oyamatmots",
+    "admins": ["oyamatmots"],
+    "version": "1.0.0",
+    "cooldowns": {
+      "default": 3,
+      "commands": {
+        "work": 1800,
+        "daily": 86400,
+        "game": 30
+      }
+    },
+    "autoReconnect": true,
+    "dmPollingInterval": 30000,
+    "maxRetries": 3
+  },
+  "economy": {
+    "startingBalance": 1000,
+    "dailyReward": 500,
+    "interestRate": 0.05,
+    "maxLoanAmount": 5000
+  },
+  "features": {
+    "economy": true,
+    "games": true,
+    "adminCommands": true,
+    "eventLogging": true,
+    "autoResponder": true
+  }
 }
