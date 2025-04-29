@@ -4,10 +4,8 @@
 
 module.exports = {
   name: 'stop-automate',
-  description: 'Stops automation tasks for a specified Instagram user',
-  usage: '!stop-automate <username>',
-  examples: '!stop-automate photography_daily',
-  category: 'automation',
+  description: 'Stops automation for a specified Instagram user',
+  usage: 'stop-automate <username>',
   adminOnly: true,
   
   /**
@@ -20,26 +18,47 @@ module.exports = {
    * @returns {object} Command result
    */
   async execute(bot, params, user, isAdmin) {
-    if (!bot.isRunning) {
-      return { success: false, message: 'Bot is not running. Start the bot first using the !start command.' };
+    // Check if username parameter is provided
+    if (params.length < 1) {
+      // If no username is provided, show a list of active automations
+      const activeAutomations = bot.getActiveAutomations();
+      
+      if (activeAutomations.length === 0) {
+        return { success: true, message: 'No active automations.' };
+      }
+      
+      let message = 'Active automations:\n';
+      activeAutomations.forEach((automation, index) => {
+        message += `${index + 1}. @${automation.username} - Actions: ${automation.actions.join(', ')} - Interval: ${automation.intervalMinutes} minutes\n`;
+      });
+      
+      message += '\nTo stop an automation, use: stop-automate <username>';
+      
+      return { success: true, message };
     }
     
-    if (params.length === 0) {
-      return {
-        success: false,
-        message: 'Please specify an Instagram username to stop automation for. Usage: !stop-automate <username>'
-      };
-    }
-    
-    const username = params[0].replace('@', '');
+    const targetUsername = params[0];
     
     try {
-      // Stop automation
-      const result = bot.stopAutomation(username);
+      // Stop the automation for the specified user
+      const result = bot.stopAutomation(targetUsername);
       
-      return result;
+      if (result.success) {
+        return { 
+          success: true, 
+          message: `Automation stopped for ${targetUsername}.`
+        };
+      } else {
+        return {
+          success: false,
+          message: `No active automation found for ${targetUsername}.`
+        };
+      }
     } catch (error) {
-      return { success: false, message: `Error stopping automation: ${error.message}` };
+      return { 
+        success: false, 
+        message: `Error stopping automation: ${error.message}` 
+      };
     }
   }
 };

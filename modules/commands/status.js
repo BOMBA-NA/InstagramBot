@@ -2,14 +2,12 @@
  * Status command - shows the current status of the bot
  */
 
-const { calculateUptime } = require('../../utils/helpers');
+const { formatTime } = require('../../utils/helpers');
 
 module.exports = {
   name: 'status',
   description: 'Shows the current status of the bot',
-  usage: '!status',
-  examples: '!status',
-  category: 'general',
+  usage: 'status',
   adminOnly: false,
   
   /**
@@ -24,30 +22,29 @@ module.exports = {
   async execute(bot, params, user, isAdmin) {
     const status = bot.getStatus();
     
-    let message = '';
+    // Basic status info available to all users
+    let message = `
+Bot status: ${status.isRunning ? 'Running' : 'Stopped'}
+Login status: ${status.loginStatus}
+${status.isRunning ? `Uptime: ${status.uptime}` : ''}
+    `.trim();
     
-    message += `Status: ${status.isRunning ? 'Running' : 'Stopped'}\n`;
-    
-    if (status.isRunning) {
-      const uptime = calculateUptime(bot.startTime);
-      message += `Uptime: ${uptime}\n`;
-    }
-    
-    message += `Prefix: ${bot.config.bot.prefix}\n`;
-    message += `Admin mode: ${bot.config.bot.adminOnly ? 'Enabled' : 'Disabled'}\n`;
-    
-    if (isAdmin || !bot.config.bot.adminOnly) {
-      message += `Rate limits:\n`;
-      message += `  - Likes: ${bot.config.bot.rateLimits.likes} per hour\n`;
-      message += `  - Follows: ${bot.config.bot.rateLimits.follows} per hour\n`;
-      message += `  - Comments: ${bot.config.bot.rateLimits.comments} per hour\n`;
+    // More detailed info for admins
+    if (isAdmin) {
+      message += `\n\nDetailed information (admin only):
+- Last login attempt: ${status.lastLoginAttempt}
+- Last activity: ${status.lastActivity}
+- Login attempts: ${status.loginAttempts}
+- Active automations: ${status.automationCount}
+${status.automationCount > 0 ? `- Automated users: ${status.activeAutomations.join(', ')}` : ''}
+      `.trim();
       
-      message += `Active automations: ${status.automationCount}\n`;
-      
-      if (status.automationCount > 0) {
-        message += 'Automated usernames:\n';
-        status.activeAutomations.forEach(username => {
-          message += `  - ${username}\n`;
+      // Recent login history
+      const history = bot.getLoginHistory(5);
+      if (history && history.length > 0) {
+        message += '\n\nRecent login events:';
+        history.forEach((event, index) => {
+          message += `\n${index + 1}. [${formatTime(event.timestamp)}] ${event.status}: ${event.details || event.username}`;
         });
       }
     }

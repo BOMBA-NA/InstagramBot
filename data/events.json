@@ -1,0 +1,219 @@
+[
+  {
+    "id": "0po1azk9wy4c",
+    "type": "commandExecuted",
+    "command": "botinfo",
+    "params": [],
+    "user": "oyamatmots",
+    "timestamp": "2025-04-29T19:02:08.332Z"
+  },
+  {
+    "id": "t5ahglktbsa",
+    "type": "started",
+    "time": "2025-04-29 19:01:47",
+    "timestamp": "2025-04-29T19:01:47.729Z"
+  },
+  {
+    "id": "87smwq54won",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T19:01:47.726Z"
+  },
+  {
+    "id": "zwmz70mn078",
+    "type": "started",
+    "time": "2025-04-29 19:00:55",
+    "timestamp": "2025-04-29T19:00:55.759Z"
+  },
+  {
+    "id": "k03ds6p6tn",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T19:00:55.756Z"
+  },
+  {
+    "id": "yx0g2smey58",
+    "type": "started",
+    "time": "2025-04-29 01:00:42",
+    "timestamp": "2025-04-29T01:00:42.290Z"
+  },
+  {
+    "id": "bofz0xcnare",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T01:00:42.284Z"
+  },
+  {
+    "id": "ba03mmo1xj",
+    "type": "started",
+    "time": "2025-04-29 00:59:15",
+    "timestamp": "2025-04-29T00:59:15.275Z"
+  },
+  {
+    "id": "5kin91wnzi6",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:59:15.272Z"
+  },
+  {
+    "id": "0j9jbuixdyii",
+    "type": "started",
+    "time": "2025-04-29 00:58:44",
+    "timestamp": "2025-04-29T00:58:44.319Z"
+  },
+  {
+    "id": "61eo0eln16u",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:58:43.313Z"
+  },
+  {
+    "id": "ijf1354vhzl",
+    "type": "started",
+    "time": "2025-04-29 00:53:42",
+    "timestamp": "2025-04-29T00:53:42.944Z"
+  },
+  {
+    "id": "55354aeyzma",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:53:42.942Z"
+  },
+  {
+    "id": "7s83mgo8xt",
+    "type": "started",
+    "time": "2025-04-29 00:48:06",
+    "timestamp": "2025-04-29T00:48:06.236Z"
+  },
+  {
+    "id": "uyyn37oixpq",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:48:06.231Z"
+  },
+  {
+    "id": "q5fv6obvzdg",
+    "type": "started",
+    "time": "2025-04-29 00:46:55",
+    "timestamp": "2025-04-29T00:46:55.887Z"
+  },
+  {
+    "id": "23dhx4jn5dw",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:46:55.880Z"
+  },
+  {
+    "id": "o6u90h06xhn",
+    "type": "started",
+    "time": "2025-04-29 00:16:50",
+    "timestamp": "2025-04-29T00:16:50.083Z"
+  },
+  {
+    "id": "x80289ik859",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:16:50.081Z"
+  },
+  {
+    "id": "7bb0vw10df",
+    "type": "started",
+    "time": "2025-04-29 00:16:36",
+    "timestamp": "2025-04-29T00:16:36.660Z"
+  },
+  {
+    "id": "o7h3rmf8hqh",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:16:36.655Z"
+  },
+  {
+    "id": "4br8c36rze9",
+    "type": "started",
+    "time": "2025-04-29 00:15:41",
+    "timestamp": "2025-04-29T00:15:41.343Z"
+  },
+  {
+    "id": "20mnfipnhe8",
+    "type": "login",
+    "status": "success",
+    "username": "kianoyamat",
+    "details": "Successfully logged in as kianoyamat",
+    "timestamp": "2025-04-29T00:15:41.341Z"
+  },
+  {
+    "id": "kfgd4to9t4b",
+    "type": "login",
+    "status": "failed",
+    "username": "kianoyamat",
+    "details": "Connection error: POST /api/v1/accounts/login/ - 400 Bad Request; challenge_required",
+    "timestamp": "2025-04-29T00:13:52.601Z"
+  },
+  {
+    "id": "vyw0brtej9m",
+    "type": "login",
+    "status": "failed",
+    "username": "kianoyamat",
+    "details": "Security challenge required",
+    "timestamp": "2025-04-29T00:13:52.601Z"
+  },
+  {
+    "id": "cseucz8wb6h",
+    "type": "login",
+    "status": "failed",
+    "username": "kianoyamat",
+    "details": "Connection error: POST /api/v1/accounts/login/ - 400 Bad Request; challenge_required",
+    "timestamp": "2025-04-29T00:10:57.934Z"
+  },
+  {
+    "id": "80asyrh5ke",
+    "type": "login",
+    "status": "failed",
+    "username": "kianoyamat",
+    "details": "Security challenge required",
+    "timestamp": "2025-04-29T00:10:57.933Z"
+  },
+  {
+    "id": "2itsegyk0bx",
+    "type": "stopped",
+    "time": "2025-04-29T00:10:49.451Z",
+    "timestamp": "2025-04-29T00:10:49.451Z"
+  },
+  {
+    "id": "ub8d28cqctb",
+    "type": "login",
+    "status": "failed",
+    "username": "your_instagram_username",
+    "details": "Instagram username not configured",
+    "timestamp": "2025-04-29T00:08:31.206Z"
+  },
+  {
+    "id": "3o734b5g3kj",
+    "type": "system",
+    "target": "bot",
+    "status": "started",
+    "details": "Bot started successfully",
+    "timestamp": "2025-04-28 23:48:27",
+    "formattedTime": "2025-04-28 23:48:27"
+  }
+]

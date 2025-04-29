@@ -1,12 +1,17 @@
 /**
- * Help command - shows list of available commands
+ * Help command - Show available commands and usage information
  */
 
 module.exports = {
   name: 'help',
-  description: 'Shows a list of available commands',
-  usage: '!help [command]',
-  examples: '!help\n!help follow',
+  aliases: ['commands', 'menu'],
+  description: 'Shows help information and available commands',
+  usage: 'help [command|category]',
+  examples: [
+    'help',
+    'help daily',
+    'help economy'
+  ],
   category: 'general',
   adminOnly: false,
   
@@ -20,80 +25,201 @@ module.exports = {
    * @returns {object} Command result
    */
   async execute(bot, params, user, isAdmin) {
-    // If a command name is provided, show help for that command
+    const prefix = bot.config.bot.prefix || '*';
+    const allCommands = bot.commands.getAllCommands();
+    
+    // If a specific command or category is requested
     if (params.length > 0) {
-      const commandName = params[0].toLowerCase();
-      const command = bot.commandHandler.getCommand(commandName);
+      const query = params[0].toLowerCase();
       
-      if (!command) {
-        return { success: false, message: `Unknown command: ${commandName}` };
+      // First, check if it's a command
+      const command = bot.commands.getCommand(query);
+      
+      if (command) {
+        return this.showCommandHelp(command, prefix);
       }
       
-      // Check if user has permission to use this command
-      if (command.adminOnly && !isAdmin && bot.config.bot.adminOnly) {
-        return { 
-          success: false, 
-          message: `You do not have permission to use the ${commandName} command.` 
-        };
-      }
-      
-      // Build command help
-      let helpText = `Command: ${bot.config.bot.prefix}${command.name}\n`;
-      helpText += `Description: ${command.description}\n`;
-      
-      if (command.usage) {
-        helpText += `Usage: ${command.usage}\n`;
-      }
-      
-      if (command.examples) {
-        helpText += `Examples:\n${command.examples}\n`;
-      }
-      
-      if (command.adminOnly) {
-        helpText += 'Admin only: Yes\n';
-      }
-      
-      return { success: true, message: helpText };
+      // If not a command, check if it's a category
+      return this.showCategoryHelp(query, allCommands, prefix, isAdmin);
     }
     
-    // Otherwise, show list of all commands
-    const allCommands = bot.commandHandler.getAllCommands();
-    const availableCommands = allCommands.filter(cmd => {
-      // Filter out admin commands if user is not an admin
-      return !cmd.adminOnly || isAdmin || !bot.config.bot.adminOnly;
+    // Otherwise, show general help
+    return this.showGeneralHelp(allCommands, prefix, isAdmin);
+  },
+  
+  /**
+   * Show help for a specific command
+   * 
+   * @param {object} command - Command object
+   * @param {string} prefix - Command prefix
+   * @returns {object} Command result
+   */
+  showCommandHelp(command, prefix) {
+    let message = `📖 **Command Help: ${command.name}**\n\n`;
+    
+    // Description
+    message += `**Description:**\n${command.description || 'No description available.'}\n\n`;
+    
+    // Usage
+    message += `**Usage:**\n${prefix}${command.usage || command.name}\n\n`;
+    
+    // Examples
+    if (command.examples && command.examples.length > 0) {
+      message += `**Examples:**\n`;
+      command.examples.forEach(example => {
+        message += `• ${prefix}${example}\n`;
+      });
+      message += '\n';
+    }
+    
+    // Aliases
+    if (command.aliases && command.aliases.length > 0) {
+      message += `**Aliases:**\n${command.aliases.map(a => `${prefix}${a}`).join(', ')}\n\n`;
+    }
+    
+    // Cooldown
+    if (command.cooldown) {
+      message += `**Cooldown:** ${command.cooldown} seconds\n\n`;
+    }
+    
+    // Admin only
+    if (command.adminOnly) {
+      message += `⚠️ This command can only be used by bot administrators.\n`;
+    }
+    
+    return {
+      success: true,
+      message
+    };
+  },
+  
+  /**
+   * Show help for a specific category
+   * 
+   * @param {string} category - Category name
+   * @param {Map} allCommands - Map of all commands
+   * @param {string} prefix - Command prefix
+   * @param {boolean} isAdmin - Whether the user is an admin
+   * @returns {object} Command result
+   */
+  showCategoryHelp(category, allCommands, prefix, isAdmin) {
+    // Filter commands by category
+    const commands = Array.from(allCommands.values())
+      .filter(cmd => {
+        // Show admin commands only to admins
+        if (cmd.adminOnly && !isAdmin) {
+          return false;
+        }
+        
+        // Match category
+        return (cmd.category || 'general').toLowerCase() === category.toLowerCase();
+      });
+    
+    if (commands.length === 0) {
+      return {
+        success: false,
+        message: `⚠️ No commands found in category '${category}'.`
+      };
+    }
+    
+    // Get category emoji
+    const emoji = this.getCategoryEmoji(category);
+    
+    let message = `${emoji} **${this.formatCategoryName(category)} Commands**\n\n`;
+    
+    // List commands
+    commands.forEach(cmd => {
+      message += `• **${prefix}${cmd.name}** - ${cmd.description || 'No description'}\n`;
     });
     
+    message += `\nType \`${prefix}help <command>\` for detailed information about a specific command.`;
+    
+    return {
+      success: true,
+      message
+    };
+  },
+  
+  /**
+   * Show general help with categories
+   * 
+   * @param {Map} allCommands - Map of all commands
+   * @param {string} prefix - Command prefix
+   * @param {boolean} isAdmin - Whether the user is an admin
+   * @returns {object} Command result
+   */
+  showGeneralHelp(allCommands, prefix, isAdmin) {
     // Group commands by category
     const categories = {};
-    availableCommands.forEach(cmd => {
-      const category = cmd.category || 'uncategorized';
+    
+    Array.from(allCommands.values()).forEach(cmd => {
+      // Skip admin commands for non-admins
+      if (cmd.adminOnly && !isAdmin) {
+        return;
+      }
+      
+      const category = cmd.category || 'general';
+      
       if (!categories[category]) {
         categories[category] = [];
       }
+      
       categories[category].push(cmd);
     });
     
-    // Build help message
-    let helpText = 'Available commands:\n\n';
+    let message = `🤖 **Instagram Bot Help**\n\n`;
     
-    for (const [category, commands] of Object.entries(categories)) {
-      // Capitalize first letter of category
-      const categoryTitle = category.charAt(0).toUpperCase() + category.slice(1);
-      helpText += `${categoryTitle} commands:\n`;
-      
-      commands.forEach(cmd => {
-        helpText += `  ${bot.config.bot.prefix}${cmd.name}: ${cmd.description}`;
-        if (cmd.adminOnly) {
-          helpText += ' (admin only)';
-        }
-        helpText += '\n';
-      });
-      
-      helpText += '\n';
-    }
+    // Categories overview
+    message += `**Available Categories:**\n`;
     
-    helpText += `Use ${bot.config.bot.prefix}help [command] for more details about a specific command.`;
+    const sortedCategories = Object.keys(categories).sort((a, b) => {
+      // Put 'general' category first
+      if (a.toLowerCase() === 'general') return -1;
+      if (b.toLowerCase() === 'general') return 1;
+      return a.localeCompare(b);
+    });
     
-    return { success: true, message: helpText };
+    sortedCategories.forEach(category => {
+      const emoji = this.getCategoryEmoji(category);
+      const formattedName = this.formatCategoryName(category);
+      message += `• ${emoji} **${formattedName}** - ${categories[category].length} commands\n`;
+    });
+    
+    message += `\nUse \`${prefix}help <category>\` to see commands in a specific category.`;
+    message += `\nUse \`${prefix}help <command>\` for detailed information about a specific command.`;
+    
+    return {
+      success: true,
+      message
+    };
+  },
+  
+  /**
+   * Get emoji for a command category
+   * 
+   * @param {string} category - Category name
+   * @returns {string} Emoji for the category
+   */
+  getCategoryEmoji(category) {
+    const categoryEmojis = {
+      'general': '🔷',
+      'economy': '💰',
+      'games': '🎮',
+      'social': '📱',
+      'admin': '⚙️',
+      'utility': '🔧'
+    };
+    
+    return categoryEmojis[category.toLowerCase()] || '📋';
+  },
+  
+  /**
+   * Format category name for display
+   * 
+   * @param {string} category - Category name
+   * @returns {string} Formatted category name
+   */
+  formatCategoryName(category) {
+    return category.charAt(0).toUpperCase() + category.slice(1);
   }
 };

@@ -5,9 +5,7 @@
 module.exports = {
   name: 'start',
   description: 'Starts the Instagram bot',
-  usage: '!start',
-  examples: '!start',
-  category: 'admin',
+  usage: 'start',
   adminOnly: true,
   
   /**
@@ -21,10 +19,14 @@ module.exports = {
    */
   async execute(bot, params, user, isAdmin) {
     if (bot.isRunning) {
-      return { success: false, message: 'Bot is already running' };
+      return { success: false, message: 'Bot is already running.' };
     }
     
-    const result = await bot.start();
-    return result;
+    try {
+      const result = await bot.start();
+      return result;
+    } catch (error) {
+      return { success: false, message: `Failed to start bot: ${error.message}` };
+    }
   }
 };

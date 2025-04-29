@@ -4,10 +4,8 @@
 
 module.exports = {
   name: 'automate',
-  description: 'Sets up automation tasks for a specified Instagram user',
-  usage: '!automate <username> <actions>',
-  examples: '!automate photography_daily like,follow\n!automate travel_pics like,comment',
-  category: 'automation',
+  description: 'Sets up automation for a specified Instagram user',
+  usage: 'automate <username> [like] [follow] [comment] [interval_minutes]',
   adminOnly: true,
   
   /**
@@ -20,48 +18,78 @@ module.exports = {
    * @returns {object} Command result
    */
   async execute(bot, params, user, isAdmin) {
-    if (!bot.isRunning) {
-      return { success: false, message: 'Bot is not running. Start the bot first using the !start command.' };
-    }
-    
-    if (params.length < 2) {
-      return {
-        success: false,
-        message: 'Please specify a username and actions to automate. Usage: !automate <username> <actions>\nAvailable actions: like, follow, comment'
+    if (params.length < 1) {
+      return { 
+        success: false, 
+        message: 'Missing parameters. Usage: automate <username> [like] [follow] [comment] [interval_minutes]' 
       };
     }
     
-    const username = params[0].replace('@', '');
-    const actionsParam = params[1].toLowerCase();
+    // Extract parameters
+    const targetUsername = params[0];
+    const actions = [];
+    let intervalMinutes = 60; // Default to 60 minutes
     
-    // Parse actions
-    const actions = actionsParam.split(',').map(action => action.trim());
+    // Parse actions and interval
+    for (let i = 1; i < params.length; i++) {
+      const param = params[i].toLowerCase();
+      
+      if (param === 'like' || param === 'follow' || param === 'comment') {
+        actions.push(param);
+      } else if (!isNaN(param)) {
+        // If it's a number, treat it as the interval in minutes
+        intervalMinutes = parseInt(param);
+        if (intervalMinutes < 30) {
+          return { 
+            success: false, 
+            message: 'Interval must be at least 30 minutes to avoid Instagram rate limits' 
+          };
+        }
+      }
+    }
     
-    // Validate actions
-    const validActions = ['like', 'follow', 'comment'];
-    const invalidActions = actions.filter(action => !validActions.includes(action));
-    
-    if (invalidActions.length > 0) {
-      return {
-        success: false,
-        message: `Invalid actions: ${invalidActions.join(', ')}. Available actions: ${validActions.join(', ')}`
-      };
+    // If no actions specified, default to like
+    if (actions.length === 0) {
+      actions.push('like');
     }
     
     try {
-      // Check if the profile exists
-      const profileExists = await bot.client.checkProfile(username);
-      
-      if (!profileExists) {
-        return { success: false, message: `Profile ${username} does not exist` };
+      // First verify the username exists
+      const instagramClient = bot.instagramClient;
+      if (!instagramClient.isLoggedIn) {
+        return { success: false, message: 'Bot is not logged in to Instagram. Start the bot first.' };
       }
       
-      // Start automation
-      const result = await bot.startAutomation(username, actions);
+      // Check if user exists
+      const userExists = await instagramClient.checkProfile(targetUsername);
+      if (!userExists) {
+        return { success: false, message: `Instagram user ${targetUsername} not found` };
+      }
       
-      return result;
+      // Set up automation
+      const result = await bot.startAutomation(targetUsername, {
+        actions: actions,
+        intervalMinutes: intervalMinutes,
+        startedBy: user,
+        startTime: new Date()
+      });
+      
+      if (result.success) {
+        return { 
+          success: true, 
+          message: `Automation set up for ${targetUsername}. Actions: ${actions.join(', ')}. Interval: ${intervalMinutes} minutes.`
+        };
+      } else {
+        return {
+          success: false,
+          message: `Failed to set up automation: ${result.message}`
+        };
+      }
     } catch (error) {
-      return { success: false, message: `Error setting up automation: ${error.message}` };
+      return { 
+        success: false, 
+        message: `Error setting up automation: ${error.message}` 
+      };
     }
   }
 };

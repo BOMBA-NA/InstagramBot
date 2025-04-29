@@ -5,9 +5,7 @@
 module.exports = {
   name: 'stop',
   description: 'Stops the Instagram bot',
-  usage: '!stop',
-  examples: '!stop',
-  category: 'admin',
+  usage: 'stop',
   adminOnly: true,
   
   /**
@@ -21,10 +19,14 @@ module.exports = {
    */
   async execute(bot, params, user, isAdmin) {
     if (!bot.isRunning) {
-      return { success: false, message: 'Bot is not running' };
+      return { success: false, message: 'Bot is not running.' };
     }
     
-    const result = await bot.stop();
-    return result;
+    try {
+      const result = await bot.stop();
+      return result;
+    } catch (error) {
+      return { success: false, message: `Failed to stop bot: ${error.message}` };
+    }
   }
 };

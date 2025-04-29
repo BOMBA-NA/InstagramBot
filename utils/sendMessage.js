@@ -3,7 +3,7 @@
  */
 
 const { log } = require('./logger');
-const { formatUsername, randomItem } = require('./helpers');
+const { randomItem, delay } = require('./helpers');
 
 /**
  * Send a direct message to an Instagram user
@@ -14,37 +14,56 @@ const { formatUsername, randomItem } = require('./helpers');
  * @returns {Promise<object>} Result of the operation
  */
 async function sendDirectMessage(client, username, message) {
-  if (!client || !client.isLoggedIn) {
-    return { success: false, message: 'Not logged in to Instagram' };
-  }
-  
-  if (!username || !message) {
-    return { success: false, message: 'Username and message are required' };
-  }
-  
   try {
-    const formattedUsername = formatUsername(username);
+    log(`Sending DM to @${username}`, 'info');
     
-    log(`Sending direct message to ${formattedUsername}`, 'info');
-    
-    // In a real implementation, use the Instagram Private API
-    // Example:
-    // const thread = await client.ig.directThread.create([userId]);
-    // await thread.broadcastText(message);
-    
-    // For our simulation:
-    await simulateDelay(1500);
-    
-    // Randomly simulate some failures (for demonstration)
-    if (username.includes('blocked_')) {
-      return { success: false, message: `Cannot send message to ${formattedUsername}: This user has blocked you` };
+    // Check if client is logged in
+    if (!client || !client.isLoggedIn) {
+      throw new Error('Instagram client not logged in');
     }
     
-    log(`Successfully sent message to ${formattedUsername}`, 'success');
-    return { success: true, message: `Message sent to ${formattedUsername}` };
+    // Format username (remove @ if present)
+    const formattedUsername = username.replace(/^@/, '');
+    
+    // Find the user by username
+    const user = await client.ig.user.searchExact(formattedUsername);
+    
+    if (!user || !user.pk) {
+      throw new Error(`User not found: ${formattedUsername}`);
+    }
+    
+    // Create direct thread with user if none exists
+    const thread = await client.ig.direct.createThread([user.pk.toString()]);
+    
+    // Simulate typing delay for more human-like behavior
+    await simulateDelay(500 + Math.random() * 1500);
+    
+    // Send the message
+    const result = await client.ig.direct.sendText({
+      threadIds: [thread.thread_id],
+      text: message
+    });
+    
+    if (result.status !== 'ok') {
+      throw new Error(`Failed to send message: ${result.status}`);
+    }
+    
+    log(`DM sent successfully to @${formattedUsername}`, 'success');
+    
+    return {
+      success: true,
+      message: `Message sent to @${formattedUsername}`,
+      threadId: thread.thread_id,
+      recipient: formattedUsername
+    };
   } catch (error) {
-    log(`Failed to send message to ${username}: ${error.message}`, 'error');
-    return { success: false, message: `Failed to send message: ${error.message}` };
+    log(`Error sending DM to @${username}: ${error.message}`, 'error');
+    
+    return {
+      success: false,
+      message: `Failed to send message: ${error.message}`,
+      recipient: username
+    };
   }
 }
 
@@ -57,41 +76,73 @@ async function sendDirectMessage(client, username, message) {
  * @returns {Promise<object>} Result of the operation
  */
 async function sendComment(client, username, comment) {
-  if (!client || !client.isLoggedIn) {
-    return { success: false, message: 'Not logged in to Instagram' };
-  }
-  
-  if (!username || !comment) {
-    return { success: false, message: 'Username and comment are required' };
-  }
-  
   try {
-    const formattedUsername = formatUsername(username);
+    log(`Preparing to comment on @${username}'s content`, 'info');
     
-    // If an array of comments is provided, pick a random one
-    const commentText = Array.isArray(comment) ? randomItem(comment) : comment;
-    
-    log(`Commenting on ${formattedUsername}'s content: "${commentText}"`, 'info');
-    
-    // In a real implementation, use the Instagram Private API
-    // Example:
-    // const userFeed = await client.ig.feed.user(userId);
-    // const posts = await userFeed.items();
-    // await client.ig.media.comment({ mediaId: posts[0].id, text: commentText });
-    
-    // For our simulation:
-    await simulateDelay(1500);
-    
-    // Randomly simulate some failures (for demonstration)
-    if (username.includes('restricted_')) {
-      return { success: false, message: `Cannot comment on ${formattedUsername}'s content: Comments are restricted` };
+    // Check if client is logged in
+    if (!client || !client.isLoggedIn) {
+      throw new Error('Instagram client not logged in');
     }
     
-    log(`Successfully commented on ${formattedUsername}'s content`, 'success');
-    return { success: true, message: `Comment posted on ${formattedUsername}'s content` };
+    // Format username (remove @ if present)
+    const formattedUsername = username.replace(/^@/, '');
+    
+    // Find the user
+    const user = await client.ig.user.searchExact(formattedUsername);
+    
+    if (!user || !user.pk) {
+      throw new Error(`User not found: ${formattedUsername}`);
+    }
+    
+    // Get user feed (recent posts)
+    const userFeed = client.ig.feed.user(user.pk);
+    const posts = await userFeed.items();
+    
+    if (!posts || posts.length === 0) {
+      throw new Error(`No posts found for user: ${formattedUsername}`);
+    }
+    
+    // Select the most recent post
+    const post = posts[0];
+    const mediaId = post.id;
+    
+    // Determine comment text (randomly select if array is provided)
+    const commentText = Array.isArray(comment) ? randomItem(comment) : comment;
+    
+    if (!commentText) {
+      throw new Error('Comment text is empty');
+    }
+    
+    // Simulate delay before commenting
+    await simulateDelay(1000 + Math.random() * 3000);
+    
+    // Post the comment
+    const result = await client.ig.media.comment({
+      mediaId,
+      text: commentText
+    });
+    
+    if (!result || !result.id) {
+      throw new Error('Failed to post comment');
+    }
+    
+    log(`Comment posted successfully on @${formattedUsername}'s post`, 'success');
+    
+    return {
+      success: true,
+      message: `Comment posted on @${formattedUsername}'s post`,
+      mediaId,
+      commentId: result.id,
+      commentText
+    };
   } catch (error) {
-    log(`Failed to comment on ${username}'s content: ${error.message}`, 'error');
-    return { success: false, message: `Failed to post comment: ${error.message}` };
+    log(`Error posting comment on @${username}'s content: ${error.message}`, 'error');
+    
+    return {
+      success: false,
+      message: `Failed to post comment: ${error.message}`,
+      username
+    };
   }
 }
 
@@ -106,35 +157,56 @@ async function sendComment(client, username, comment) {
  * @returns {Promise<object>} Result of the operation
  */
 async function sendCommentReply(client, username, mediaId, commentId, reply) {
-  if (!client || !client.isLoggedIn) {
-    return { success: false, message: 'Not logged in to Instagram' };
-  }
-  
-  if (!username || !mediaId || !commentId || !reply) {
-    return { success: false, message: 'Username, mediaId, commentId, and reply are required' };
-  }
-  
   try {
-    const formattedUsername = formatUsername(username);
+    log(`Preparing to reply to @${username}'s comment`, 'info');
     
-    log(`Replying to ${formattedUsername}'s comment: "${reply}"`, 'info');
+    // Check if client is logged in
+    if (!client || !client.isLoggedIn) {
+      throw new Error('Instagram client not logged in');
+    }
     
-    // In a real implementation, use the Instagram Private API
-    // Example:
-    // await client.ig.media.comment({
-    //   mediaId,
-    //   text: reply,
-    //   replyToCommentId: commentId
-    // });
+    // Ensure we have the required parameters
+    if (!mediaId || !commentId || !reply) {
+      throw new Error('Missing required parameters for comment reply');
+    }
     
-    // For our simulation:
-    await simulateDelay(1000);
+    // Format the reply to ensure it mentions the user
+    const formattedReply = reply.startsWith(`@${username}`) 
+      ? reply 
+      : `@${username} ${reply}`;
     
-    log(`Successfully replied to ${formattedUsername}'s comment`, 'success');
-    return { success: true, message: `Reply posted to ${formattedUsername}'s comment` };
+    // Simulate delay before replying
+    await simulateDelay(800 + Math.random() * 2000);
+    
+    // Post the reply
+    const result = await client.ig.media.comment({
+      mediaId,
+      text: formattedReply,
+      replyToCommentId: commentId
+    });
+    
+    if (!result || !result.id) {
+      throw new Error('Failed to post comment reply');
+    }
+    
+    log(`Reply posted successfully to @${username}'s comment`, 'success');
+    
+    return {
+      success: true,
+      message: `Reply posted to @${username}'s comment`,
+      mediaId,
+      replyCommentId: result.id,
+      originalCommentId: commentId,
+      replyText: formattedReply
+    };
   } catch (error) {
-    log(`Failed to reply to ${username}'s comment: ${error.message}`, 'error');
-    return { success: false, message: `Failed to post reply: ${error.message}` };
+    log(`Error posting reply to @${username}'s comment: ${error.message}`, 'error');
+    
+    return {
+      success: false,
+      message: `Failed to post reply: ${error.message}`,
+      username
+    };
   }
 }
 
@@ -144,11 +216,12 @@ async function sendCommentReply(client, username, mediaId, commentId, reply) {
  * @returns {Promise} Promise that resolves after the delay
  */
 async function simulateDelay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return delay(ms);
 }
 
 module.exports = {
   sendDirectMessage,
   sendComment,
-  sendCommentReply
+  sendCommentReply,
+  simulateDelay
 };

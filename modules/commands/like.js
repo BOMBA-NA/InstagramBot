@@ -4,10 +4,8 @@
 
 module.exports = {
   name: 'like',
-  description: 'Likes recent content from a specified Instagram user',
-  usage: '!like <username>',
-  examples: '!like photography_daily',
-  category: 'action',
+  description: 'Likes content from a specified Instagram user',
+  usage: 'like <username>',
   adminOnly: false,
   
   /**
@@ -20,33 +18,37 @@ module.exports = {
    * @returns {object} Command result
    */
   async execute(bot, params, user, isAdmin) {
-    if (!bot.isRunning) {
-      return { success: false, message: 'Bot is not running. Start the bot first using the !start command.' };
-    }
-    
-    if (params.length === 0) {
-      return {
-        success: false,
-        message: 'Please specify an Instagram username to like content from. Usage: !like <username>'
+    if (params.length < 1) {
+      return { 
+        success: false, 
+        message: 'Missing parameters. Usage: like <username>' 
       };
     }
     
-    const username = params[0].replace('@', '');
+    const targetUsername = params[0];
     
     try {
-      // Check if the profile exists
-      const profileExists = await bot.client.checkProfile(username);
-      
-      if (!profileExists) {
-        return { success: false, message: `Profile ${username} does not exist` };
+      // Check if bot is running and logged in to Instagram
+      if (!bot.isRunning || !bot.instagramClient || !bot.instagramClient.isLoggedIn) {
+        return { success: false, message: 'Bot is not running or not logged in to Instagram.' };
       }
       
-      // Like content
-      const result = await bot.client.likeContent(username);
+      // Emit command execution event
+      bot.emit('commandExecuted', {
+        command: 'like',
+        params: params,
+        user: user,
+        timestamp: new Date()
+      });
       
+      // Execute the like operation
+      const result = await bot.instagramClient.likeContent(targetUsername);
       return result;
     } catch (error) {
-      return { success: false, message: `Error liking content: ${error.message}` };
+      return { 
+        success: false, 
+        message: `Error liking content: ${error.message}` 
+      };
     }
   }
 };

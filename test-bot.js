@@ -3,25 +3,39 @@
  */
 
 const bot = require('./index');
+const { formatTime } = require('./utils/helpers');
 
 // Start the bot
 bot.start().then(result => {
   console.log(result.message);
   
-  // Test some commands
+  // Test basic status
   setTimeout(async () => {
-    console.log('\nTesting help command:');
-    const helpResult = await bot.executeCommand('help', [], 'admin123', true);
-    console.log(helpResult.message);
+    console.log('\nTesting bot status:');
+    const status = bot.getStatus();
+    console.log(`- Running: ${status.isRunning}`);
+    console.log(`- Login status: ${status.loginStatus}`);
+    console.log(`- Uptime: ${status.uptime}`);
     
-    console.log('\nTesting status command:');
-    const statusResult = await bot.executeCommand('status', [], 'admin123', true);
-    console.log(statusResult.message);
+    // Test login history 
+    console.log('\nLogin history:');
+    const history = bot.getLoginHistory();
+    if (history.length === 0) {
+      console.log('No login events recorded yet.');
+    } else {
+      history.forEach((event, index) => {
+        console.log(`${index + 1}. [${formatTime(event.timestamp)}] ${event.status}: ${event.details || event.username}`);
+      });
+    }
     
     // Test a user interaction
-    console.log('\nTesting like command:');
-    const likeResult = await bot.executeCommand('like', ['photography_daily'], 'admin123', true);
-    console.log(likeResult.message);
+    console.log('\nTesting Instagram profile check:');
+    try {
+      const profileExists = await bot.client.checkProfile('example_user');
+      console.log(`Profile check result: ${profileExists ? 'Exists' : 'Does not exist'}`);
+    } catch (error) {
+      console.log(`Profile check error: ${error.message}`);
+    }
     
     // Stop the bot after tests
     setTimeout(async () => {
